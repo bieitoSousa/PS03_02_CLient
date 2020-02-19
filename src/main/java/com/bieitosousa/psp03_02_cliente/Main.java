@@ -42,22 +42,6 @@ public class Main {
 
     }
 
-    public void startIN() {
-        try {
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public void startOUT() {
-        try {
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     public String sendMessage(String msg) {
         try {
 
@@ -106,51 +90,49 @@ public class Main {
     }
 
     public static void main(String[] arg) {
-     Main m = new Main();
-     m.programFile();
+        Main m = new Main();
+        m.programFile();
 
     }
 
-    
-
     public boolean programFile() { // prueva con strings
-        try{
-        final String cabecera = "[CLI] mensaje:";
-        final String errorSend = "send_error";
-        final String errorReader = "reader_error";
-        final String errorSearch = "search_error";
-        String filename = "prueba.txt";
-        final String ok = "ok";
-        final String error = "error";
-        startConnection("localhost", 1500);
-        String msn = cabecera + filename;
-        String l;
-        if ((l = sendMessage(msn)).contains(error)) {
-            System.out.println("[CLI_RECIBE]:"+l);
-            if (l.contains(errorSend)) {
-                System.out.println("ERROR: enviando el archivo");
-            } else if (l.contains(errorReader)) {
-                System.out.println("ERROR: leyendo el mensaje");
-            } else if (l.contains(errorSearch)) {
-                System.out.println("No se a encontrado el archivo " + filename + " en el servidor");
+        try {
+            final String cabecera = "[CLI] mensaje:";
+            final String errorSend = "send_error";
+            final String errorReader = "reader_error";
+            final String errorSearch = "search_error";
+            String filename = "prueba.txt";
+            final String ok = "ok";
+            final String error = "error";
+            startConnection("localhost", 1500);
+            String msn = cabecera + filename;
+            String l;
+            if ((l = sendMessage(msn)).contains(error)) {
+                System.out.println("[CLI_RECIBE]:" + l);
+                if (l.contains(errorSend)) {
+                    System.out.println("ERROR: enviando el archivo");
+                } else if (l.contains(errorReader)) {
+                    System.out.println("ERROR: leyendo el mensaje");
+                } else if (l.contains(errorSearch)) {
+                    System.out.println("No se a encontrado el archivo " + filename + " en el servidor");
+                } else {
+                    System.out.println("ERROR: inesperado");
+                }
+            } else if (l.contains(ok)) {
+                System.out.println("INtercambiando archivos");
+                takeFile();
+                readFile(new File("."+File.separator + filename));
             } else {
                 System.out.println("ERROR: inesperado");
             }
-        } else if (l.contains(ok)) {
-            System.out.println("INtercambiando archivos");
-            takeFile();
-            readFile(new File(".\\" + filename));
-        } else {
-             System.out.println("ERROR: inesperado");
-        }
-        System.out.println("[CLI]fin");
-        
-    } catch (Exception e) {
+            System.out.println("[CLI]fin");
+
+        } catch (Exception e) {
             System.err.println(e);
             return false;
 
-        }finally{
-        stopConnection();
+        } finally {
+            stopConnection();
         }
         return true;
     }
@@ -175,7 +157,7 @@ public class Main {
                 DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
                 //Recibimos el nombre del fichero
                 file = dis.readUTF();
-                file = file.substring(file.indexOf('\\') + 1, file.length());
+                file = file.substring(file.indexOf(File.separator) + 1, file.length());
                 //Para guardar fichero recibido
                 bos = new BufferedOutputStream(new FileOutputStream(file));
                 while ((in = bis.read(receivedData)) != -1) {
